@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Voting</title>
+	<script src="/public/third-party/jquery/jquery-1.12.4.min.js"></script>
+</head>
+<body>
+	<div id="user"></div>
+	<div id="title"></div>
+	<div id="selection">
+		<ul id="list">
+		</ul>
+	</div>
+	<script>
+		$(document).ready(function(){
+			var id = window.location.pathname.split('/')[2];
+			var userDiv = $('#user');
+			var titleDiv = $('#title');
+			var list = $('#list');
+			$.get('/user', function(user){
+				if (user){
+					userDiv.html('Hello, ' + user.displayName + ' <button id="logout">Logout</button>');
+					$('#logout').on('click', function(){
+						$.post('/post', {msg:'logout'}, function(data){
+							if (data.msg === 'OK'){
+								window.location.reload();
+							}
+						});
+					});
+				}
+				else {
+					userDiv.html('You are not login <button id="login">Login now</button>');
+					$('#login').on('click', function(){
+						window.open("/auth", "", "width=600,height=400");
+					});
+				}
+			});
+			$.get('/votejson/' + id, function(data){
+				console.log(data);
+				titleDiv.html('id: ' + id + ' name: ' + data.title);
+				for (var i = 0; i < data.voteList.length; i++){
+					list.append('<li>' +data.voteList[i].name + ' : <span class="count">'+data.voteList[i].count + '</span><button class="vote">+</button></li>');
+				}
+				$('.vote').on('click', function(){
+					var index = $(this).parent().index();
+					
+					var countElem = list.children().eq(index).find('.count');
+					$.post('/post', {
+						msg: 'vote',
+						id: id,
+						index: index
+					}, function(data){
+						console.log(data.msg);
+						if (data.msg === 'OK'){
+							countElem.html(parseInt(countElem.html()) + 1);
+						}
+						else {
+							
+						}
+					});
+				});
+			});
+		});
+	</script>
+</body>
+</html>
