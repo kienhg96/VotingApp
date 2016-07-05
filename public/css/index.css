@@ -1,0 +1,32 @@
+body{
+
+}
+ a:link
+{
+    text-decoration: none !important;
+}
+.anchor-vote {
+	margin-top: 3px;
+	text-align: center;
+	line-height: 40px;
+	border-radius: 10px;
+	background-color: #F0F0F0;
+	font-size: 20px;
+
+}
+.anchor-vote:hover{
+	background-color: #E5E5E5;
+}
+.anchor-vote:active{
+	background-color: #DADADA;
+}
+.navbar-brand {
+  padding: 0px; /* firefox bug fix */
+}
+.navbar-brand>img {
+  height: 100%;
+  width: auto;
+}
+#mypoll {
+	display: none;
+}

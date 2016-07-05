@@ -91,6 +91,26 @@ module.exports = function(app, db){
 				}
 			});
 		}
+		if (msg === 'mypoll') {
+			if (req.isAuthenticated()){
+				collection.find({authorId: req.user.twitterId}).toArray(function(err, data){
+					if (err) throw err;
+					var arr = data.map(function(obj){
+						return {
+							id: obj._id.toString(),
+							title: obj.title
+						}
+					});
+					res.json(arr);
+				});
+			}
+			else {
+				res.json(null);
+			}
+		}
+		if (msg === 'hello'){
+			res.json({msg: 'hi'});
+		}
 	});
 	app.get('/user', function(req, res){
 		if (req.isAuthenticated()){
@@ -101,7 +121,7 @@ module.exports = function(app, db){
 		}
 	});
 	app.get('/vote/:id', function(req, res){
-		res.sendFile(path.join(__dirname, '../view/vote.html'))
+		res.sendFile(path.join(__dirname, '../view/vote.html'));
 	});
 	app.get('/votejson/:id', function(req, res){
 		collection.findOne({_id: ObjectId(req.params.id)}, function(err, doc){
@@ -128,5 +148,8 @@ module.exports = function(app, db){
 				res.json(null);
 			}
 		});
+	});
+	app.get('/mypoll', function(req, res){
+		res.sendFile(path.join(__dirname, '../view/mypoll.html'));
 	});
 }
