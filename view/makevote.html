@@ -4,12 +4,29 @@
 	<title>Make A vote</title>
 	<script src="/public/third-party/jquery/jquery-1.12.4.min.js"></script>
 	<script src="/public/js/makevote.js"></script>
+	<script src="/public/third-party/bootstrap/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/public/third-party/bootstrap/css/bootstrap.min.css">
 </head>
 <body>
+	<div class="container">
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="/">Voting app</a>
+			</div>
+			<ul class="nav navbar-nav navbar-right" style="margin: auto">
+				<li id="mypoll"><a href="/mypoll">My poll</a>
+				<li id="makevote"><a href="/makevote">Make vote</a></li>
+				<li><span class="navbar-text" id="user"></span></li>
+				<li><button class="btn btn-primary navbar-btn" id="loginout">Login</button></li>
+			</ul>
+		</div>
+	</nav>
 	<div id="makevote">
-		<input type="text" id="title" placeholder="Title"><br>
-		<textarea id="selection" placeholder="Selection" rows="10" cols="30"></textarea><br>
-		<button id="submit">Submit</button><br>
+		<input type="text" id="title" placeholder="Title" class="form-control"><br>
+		<textarea id="selection" placeholder="Selection" rows="10" cols="30" class="form-control"></textarea><br>
+		<button id="submit" class="btn btn-primary">Submit</button><br>
+	</div>
 	</div>
 </body>
 </html>

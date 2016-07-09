@@ -3,24 +3,79 @@
 <head>
 	<title>Voting</title>
 	<script src="/public/third-party/jquery/jquery-1.12.4.min.js"></script>
+	<script src="/public/third-party/bootstrap/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/public/third-party/bootstrap/css/bootstrap.min.css">
+	<script src="/public/third-party/Chart.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/public/css/vote.css">
+	<link rel="stylesheet" href="/public/third-party/bootstrap-select.min.css">
+	<link rel="stylesheet" type="text/css" href="/public/third-party/font-awesome/css/font-awesome.min.css">
+	<script src="/public/third-party/bootstrap-select.min.js"></script>
+	<style type="text/css">
+		#makevote {
+			display: none;
+		}
+	</style>
 </head>
 <body>
-	<div id="user"></div>
-	<div id="title"></div>
-	<div id="selection">
-		<ul id="list">
-		</ul>
+	<div class="container">
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="/">Voting app</a>
+			</div>
+			<ul class="nav navbar-nav navbar-right" style="margin: auto">
+				<li id="mypoll"><a href="/mypoll">My poll</a>
+				<li id="makevote"><a href="/makevote">Make vote</a></li>
+				<li><span class="navbar-text" id="user"></span></li>
+				<li><button class="btn btn-primary navbar-btn" id="loginout">Login</button></li>
+			</ul>
+		</div>
+	</nav>
+	<p id="title" style="text-align: center"></p>
+	<div id="voting">
+		<canvas id="voteCanvas"></canvas>
+	</div>
+	<div class="jumbotron">
+		<select class="selectpicker">
+		</select>
+		<button id="btnVote" class="btn btn-danger">Vote</button>
+		<button id="share" class="btn btn-primary"><i class="fa fa-twitter" aria-hidden="true"></i> Share on Twitter</button>
+	</div>
 	</div>
 	<script>
+		var backgroundTemplate = [
+				                'rgba(255, 99, 132, 0.2)',
+				                'rgba(54, 162, 235, 0.2)',
+				                'rgba(255, 206, 86, 0.2)',
+				                'rgba(75, 192, 192, 0.2)',
+				                'rgba(153, 102, 255, 0.2)',
+				                'rgba(255, 159, 64, 0.2)'
+				            ];
+		var borderColorTemplate = [
+				                'rgba(255,99,132,1)',
+				                'rgba(54, 162, 235, 1)',
+				                'rgba(255, 206, 86, 1)',
+				                'rgba(75, 192, 192, 1)',
+				                'rgba(153, 102, 255, 1)',
+				                'rgba(255, 159, 64, 1)'
+				            ];
 		$(document).ready(function(){
 			var id = window.location.pathname.split('/')[2];
 			var userDiv = $('#user');
-			var titleDiv = $('#title');
-			var list = $('#list');
-			$.get('/user', function(user){
-				if (user){
-					userDiv.html('Hello, ' + user.displayName + ' <button id="logout">Logout</button>');
-					$('#logout').on('click', function(){
+			var loginout = $('#loginout');
+			var optionList = $('select');
+			var btnVote = $('#btnVote');
+			var title;
+			var canvas = document.getElementById('voteCanvas');
+			var ctx = canvas.getContext('2d');
+			$.get('/user', function(data){
+				if (data){
+					//console.log(data);
+					$('#mypoll').show();
+					$('#makevote').show();
+					userDiv.html('Hello, ' + data.displayName);
+					loginout.html('Logout');
+					loginout.on('click', function(){
 						$.post('/post', {msg:'logout'}, function(data){
 							if (data.msg === 'OK'){
 								window.location.reload();
@@ -29,22 +84,56 @@
 					});
 				}
 				else {
-					userDiv.html('You are not login <button id="login">Login now</button>');
-					$('#login').on('click', function(){
+					userDiv.html('');
+					loginout.html('Login');
+					loginout.on('click', function(){
 						window.open("/auth", "", "width=600,height=400");
 					});
 				}
 			});
+			
 			$.get('/votejson/' + id, function(data){
 				console.log(data);
-				titleDiv.html('id: ' + id + ' name: ' + data.title);
+				var labels = [];
+				var arrdata = [];
+				var backgroundColor = [];
+				var borderColor = [];
+				title = data.title;
+				$('#title').html(title);
 				for (var i = 0; i < data.voteList.length; i++){
-					list.append('<li>' +data.voteList[i].name + ' : <span class="count">'+data.voteList[i].count + '</span><button class="vote">+</button></li>');
+					optionList.append(new Option(data.voteList[i].name, i));
+					labels.push(data.voteList[i].name);
+					arrdata.push(data.voteList[i].count);
+					backgroundColor.push(backgroundTemplate[i % backgroundTemplate.length]);
+					borderColor.push(borderColorTemplate[i % borderColorTemplate.length]);
 				}
-				$('.vote').on('click', function(){
-					var index = $(this).parent().index();
-					
-					var countElem = list.children().eq(index).find('.count');
+				optionList.selectpicker('refresh');
+				var myChart = new Chart(ctx, {
+				    type: 'bar',
+				    data: {
+				        labels: labels,
+				        datasets: [{
+				            label: '# of Votes',
+				            data: arrdata,
+				            backgroundColor: backgroundColor,
+				            borderColor: borderColor,
+				            borderWidth: 1
+				        }]
+				    },
+				    options: {
+				        scales: {
+				            yAxes: [{
+				                ticks: {
+				                    beginAtZero:true
+				                }
+				            }]
+				        },
+				    }
+				});
+
+				btnVote.on('click', function(){
+					var index = optionList.val();
+					console.log(index);
 					$.post('/post', {
 						msg: 'vote',
 						id: id,
@@ -52,12 +141,17 @@
 					}, function(data){
 						console.log(data.msg);
 						if (data.msg === 'OK'){
-							countElem.html(parseInt(countElem.html()) + 1);
+							window.location.reload();
 						}
 						else {
-							
+							alert('You voted');
 						}
 					});
+				});
+				$('#share').on('click', function(){
+					console.log('Share');
+					var link = 'https://twitter.com/share?text=' + title + '&url=' + window.location.href;
+					window.open(link, "_blank");
 				});
 			});
 		});

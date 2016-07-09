@@ -7,6 +7,7 @@ $(document).ready(function(){
 		if (data){
 			//console.log(data);
 			$('#mypoll').show();
+			$('#makevote').show();
 			userDiv.html('Hello, ' + data.displayName);
 			loginout.html('Logout');
 			loginout.on('click', function(){

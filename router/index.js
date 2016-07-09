@@ -21,10 +21,10 @@ module.exports = function(app, db){
 		if (msg === 'makevote'){
 			if (req.isAuthenticated()){
 				var vote = makevote(req.body, req.user.twitterId);
-				collection.insert(vote, function(err){
+				collection.insert(vote, function(err, data){
 					if (err) throw err;
+					res.send({msg: 'OK', id: data.insertedIds[0]});
 				});
-				res.send({msg: 'OK'});
 			}
 			else {
 				res.send({msg: "Failed"});

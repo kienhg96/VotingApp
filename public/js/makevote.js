@@ -3,8 +3,19 @@ $(document).ready(function(){
 	var btnSubmit = $('#submit');
 	var txtTitle = $('#title');
 	var txtSelection = $('#selection');
+	var userDiv = $('#user');
+	var loginout = $('#loginout');
 	$.get('/user', function(data){
 		if (data){
+			userDiv.html('Hello, ' + data.displayName);
+			loginout.html('Logout');
+			loginout.on('click', function(){
+				$.post('/post', {msg:'logout'}, function(data){
+					if (data.msg === 'OK'){
+						window.location = '/';
+					}
+				});
+			});
 			btnSubmit.on('click', function(){
 				var title = txtTitle.val();
 				var selection = txtSelection.val().split('\n');
@@ -21,16 +32,13 @@ $(document).ready(function(){
 				};
 				$.post('/post', vote, function(data){
 					if (data.msg === 'OK'){
-					//	alert('OK');
+						window.location = '/vote/' + data.id;
 					}
 				});
 			});
 		}
 		else {
-			divMakevote.html('You must login to Make a vote <button id="login">Login now</button>');
-			$('#login').on('click', function(){
-				window.open("/auth", "", "width=600,height=400");
-			});
+			window.location = '/';
 		}
 	});
 });
